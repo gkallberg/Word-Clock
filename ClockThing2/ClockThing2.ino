@@ -5,69 +5,69 @@ RTC_PCF8523 rtc;
 #define NUMPIXELS 132
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-//Contains the LED values in each row of the clock
+//Contains the LED values in each row of the clock, on LED board they are numbered in a snake pattern
 int leds[11][12] = {
-  {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-  {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
-  {24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35},
-  {36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47},
-  {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59},
-  {60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71},
-  {72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83},
-  {84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95},
-  {96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107},
-  {108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119},
-  {120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131}
+  {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},                           // ----->
+  {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},                 // <-----
+  {24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35},                 // ----->
+  {36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47},                 // <-----
+  {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59},                 // ----->
+  {60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71},                 // <-----
+  {72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83},                 // ----->
+  {84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95},                 // <-----
+  {96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107},         // ----->
+  {108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119},     // <-----
+  {120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131}      // ----->
 };
 
 //Contains the LED values for the minutes
 int mins[12][2] = {
-  { -1, -1},         //empty value for when it's just an hour
-  {30, 33},          //five
-  {38, 40},          //ten
-  {15, 21},          //fifteen
-  {24, 29},          //twenty
-  {24, 33},          //twentyfive
-  {42, 47},          //thirty
-  {24, 33},          //twentyfive
-  {24, 29},          //twenty
-  {15, 21},          //fifteen
-  {38, 40},          //ten
-  {30, 33}           //five
+  { -1, -1},         //Empty value for when it's just an hour
+  {30, 33},          //Five
+  {38, 40},          //Ten
+  {15, 21},          //Fifteen
+  {24, 29},          //Twenty
+  {24, 33},          //Twentyfive
+  {42, 47},          //Thirty
+  {24, 33},          //Twentyfive
+  {24, 29},          //Twenty
+  {15, 21},          //Fifteen
+  {38, 40},          //Ten
+  {30, 33}           //Five
 };
 
 //Contains the LED values for the hours
 int hrs[24][2] = {
-  {109, 111},        //one
-  {84, 86},          //two
-  {112, 116},        //three
-  {61, 64},          //four
-  {88, 91},          //five
-  {117, 119},        //six
-  {72, 76},          //seven
-  {96, 100},         //eight
-  {92, 95},          //nine
-  {120, 122},        //ten
-  {102, 107},        //eleven
-  {78, 83}           //twelve
+  {109, 111},        //One
+  {84, 86},          //Two
+  {112, 116},        //Three
+  {61, 64},          //Four
+  {88, 91},          //Five
+  {117, 119},        //Six
+  {72, 76},          //Seven
+  {96, 100},         //Eight
+  {92, 95},          //Nine
+  {120, 122},        //Ten
+  {102, 107},        //Eleven
+  {78, 83}           //Twelve
 };
 
 //Contains the LED values for the extra words
 int extras[6][2] = {
-  {0, 1},            //it
-  {3, 4},            //is
-  {126, 131},        //o'clock
-  {48, 54},          //minutes
-  {68, 71},          //past
-  {67, 68}           //to
+  {0, 1},            //It
+  {3, 4},            //Is
+  {126, 131},        //O'clock
+  {48, 54},          //Minutes
+  {68, 71},          //Past
+  {67, 68}           //To
 };
 
 //Contains a set of values for every five minutes
 int intv[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 
 void setup() {
-  if (! rtc.initialized() || rtc.lostPower()) {
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  if (! rtc.initialized() || rtc.lostPower()) {           //For when the clock is loaded or loses and regains power
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));       //Syncs time with computer's time
   }
   rtc.start();                                            //Starts clock
   float drift = 43;
@@ -89,12 +89,12 @@ void change_minute(int this_minute, int this_second) {
 //Changes hours
 void change_hour(int this_hour, int this_minute, int this_second) {
   if (this_minute < intv[7]) {                                                   //For when it's less than 35 minutes into the hour
-    for (int i = hrs[this_hour][0]; i <= hrs[this_hour][1]; i++) {
-      pixels.setPixelColor(i, pixels.Color(0, 0, 100));
+    for (int i = hrs[this_hour][0]; i <= hrs[this_hour][1]; i++) {               //Sets up the LEDs for the corresponding hour
+      pixels.setPixelColor(i, pixels.Color(0, 0, 100));                          //Sets the color of the LEDs
     }
   } else {                                                                       //For when it's greater than 35 minutes into the hour
-    for (int i = hrs[this_hour + 1][0]; i <= hrs[this_hour + 1][1]; i++) {
-      pixels.setPixelColor(i, pixels.Color(0, 0, 100));
+    for (int i = hrs[this_hour + 1][0]; i <= hrs[this_hour + 1][1]; i++) {       //Sets up the LEDs for the corresponding hour
+      pixels.setPixelColor(i, pixels.Color(0, 0, 100));                          //Sets the color of the LEDs
     }
   }
 }
@@ -139,5 +139,5 @@ void show_pixels() {
 }
 
 void loop() {
-  show_pixels();  //Lights up LEDs repeatedly
+  show_pixels();      //Lights up LEDs
 }
