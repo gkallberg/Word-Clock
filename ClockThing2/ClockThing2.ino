@@ -85,7 +85,7 @@ void setup() {                                           //Runs once when the co
     abort();                                               //Stops the program
   }
   if (! rtc.initialized() || rtc.lostPower()) {           //For when the clock is loaded or loses and regains power
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));        //Syncs time with computer's time
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));        //Syncs the clock's time with computer's time
   }
   rtc.start();                                            //Starts clock
   pixels.begin();                                         //Sets up the LEDs
