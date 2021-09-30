@@ -4,7 +4,6 @@ RTC_PCF8523 rtc;
 #define PIN        6
 #define NUMPIXELS 132
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-#define DELAYVAL 500
 
 //Contains the LED values in each row of the clock, on the LED board they are numbered in a snake pattern
 int leds[11][12] = {
