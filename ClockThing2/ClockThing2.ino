@@ -1,4 +1,4 @@
-#include "RTClib.h"
+  #include "RTClib.h"
 RTC_PCF8523 rtc;
 #include <Adafruit_NeoPixel.h>
 #define PIN        6
@@ -91,10 +91,14 @@ void setup() {                                           //Runs once when the co
   pixels.clear();                                         //Turns off all LEDs
 }
 
+int r = 0;           //Sets a variable for the red value
+int g = 0;           //Sets a variable for the green value
+int b = 0;           //Sets a variable for the blue value
+
 //Changes minutes
 void change_minute(int this_minute, int this_second) {                     //Defines the function and adds values that can be passed into the function
   for (int i = mins[this_minute][0]; i <= mins[this_minute][1]; i++) {      //Sets up LEDs for the corresponding five minute interval
-    pixels.setPixelColor(i, pixels.Color(0, 0, 100));                        //Sets the color of the LEDs
+    pixels.setPixelColor(i, pixels.Color(r, g, b));                        //Sets the color of the LEDs
   }
 }
 
@@ -102,18 +106,18 @@ void change_minute(int this_minute, int this_second) {                     //Def
 void change_hour(int this_hour, int this_minute, int this_second) {             //Defines the function and adds values that can be passed into the function
   if (this_minute < intv[7]) {                                                   //For when it's less than 35 minutes into the hour
     for (int i = hrs[this_hour][0]; i <= hrs[this_hour][1]; i++) {                //Sets up the LEDs for the corresponding hour
-      pixels.setPixelColor(i, pixels.Color(0, 0, 100));                            //Sets the color of the LEDs
+      pixels.setPixelColor(i, pixels.Color(r, g, b));                            //Sets the color of the LEDs
     }
   } else {                                                                       //For when it's greater than 35 minutes into the hour
     for (int i = hrs[this_hour + 1][0]; i <= hrs[this_hour + 1][1]; i++) {        //Sets up the LEDs for the corresponding hour
-      pixels.setPixelColor(i, pixels.Color(0, 0, 100));                            //Sets the color of the LEDs
+      pixels.setPixelColor(i, pixels.Color(r, g, b));                            //Sets the color of the LEDs
     }
   }
 }
 
 //Changes extra words
 void change_extras(int this_minute) {                        //Defines the function and adds values that can be passed into the function
-  int extra_words;                                            //Defines the "extra_words" variable
+  int extra_words;                                            //Sets a variable for "extra_words"
   if (this_minute >= 5) {                                     //For when the time is not on an hour (greater than or equal to 5 minutes into the hour)
     if (this_minute < intv[7]) {                               //For when it's less than 35 minutes into the hour
       extra_words = 4;                                          //Sets up the LEDs for when the words "It", "Is", "Minutes", "Past", and "O'clock" should show
@@ -125,12 +129,12 @@ void change_extras(int this_minute) {                        //Defines the funct
   }
   for (int i = 0; i <= extra_words; i++) {                    //Sets up the LEDs for the corresponding number of extra words that need to appear
     for (int j = extras[i][0]; j <= extras[i][1]; j++) {       //Sets up LEDs for the corresponding extra words
-      pixels.setPixelColor(j, pixels.Color(0, 0, 100));         //Sets the color of the LEDs
+      pixels.setPixelColor(j, pixels.Color(r, g, b));         //Sets the color of the LEDs
     }
   }
   if (this_minute >= intv[7]) {                               //For when it's less than 35 minutes into the hour
     for (int i = extras[5][0]; i <= extras[5][1]; i++) {       //Sets up the LEDs for when the word "To" should show
-      pixels.setPixelColor(i, pixels.Color(0, 0, 100));         //Sets the color of the LEDs
+      pixels.setPixelColor(i, pixels.Color(r, g, b));         //Sets the color of the LEDs
     }
   }
 }
@@ -140,8 +144,12 @@ void show_pixels() {                              //Defines the function
   DateTime now = rtc.now();                        //Allows for "now." functions to be called
   int time_sec = now.second();                     //Sets a variable to the current second
   int time_min = now.minute();                     //Sets a variable to the current minute
+  
   int time_hr = now.hour();                        //Sets a variable to the current hour
-  if ((time_min % 5) == 0) {                       //Updates the time every five minutes
+  if ((time_min % 5) == 0) {                       //For when the time is on a five minute interval
+    r = 255;                                        //Sets the red value
+    g = 0;                                          //Sets the green value
+    b = 0;                                          //Sets the blue value
     pixels.clear();                                 //Turns off all of the LEDs
     change_minute((time_min / 5), time_sec);        //Calls the minute changinng function and passes the current time into it
     change_hour(time_hr, time_min, time_sec);       //Calls the hour changing function and passes the current time into it
