@@ -108,7 +108,7 @@ int intv[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 
 void setup() {                                           //Runs once when the code is initiated
   Serial.begin(115200);
-  Serial.println(F("Adafruit Bluefruit App Controller Example"));
+  Serial.println(F("Clock Thing Test"));
   Serial.println(F("-----------------------------------------"));
   Serial.print(F("Initialising the Bluefruit LE module: "));
   if ( !ble.begin(VERBOSE_MODE) ) {
@@ -221,9 +221,11 @@ void show_pixels() {                              //Defines the function
 void loop() {        //Executes repeatedly
   uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
   if (len == 0) return;
-  red = packetbuffer[2];
-  green = packetbuffer[3];
-  blue = packetbuffer[4];
+  if (packetbuffer[1] == 'C') {
+    red = packetbuffer[2];
+    green = packetbuffer[3];
+    blue = packetbuffer[4];
+  }
   show_pixels();      //Lights up LEDs
   Serial.println(red);
 }
@@ -243,4 +245,4 @@ void loop() {        //Executes repeatedly
   send through BLEUart thing
   take those and set them to the hr min and sec variables
   count from there (need to chnage the thing that sets the time based on the computer)
-         rtc.adjust(DateTime(F(__DATE__), F(hr, min, sec))); <--- maybe? might need to set date also to make it work
+         rtc.adjust(DateTime(F(__DATE__), F(hr, min, sec))); <--- maybe? might need to set date also to make it work*/
