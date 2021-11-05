@@ -24,11 +24,9 @@ uint8_t readPacket(Adafruit_BLE *ble, uint16_t timeout);
 float parsefloat(uint8_t *buffer);
 void printHex(const uint8_t * data, const uint32_t numBytes);
 extern uint8_t packetbuffer[];
-
 uint8_t red = packetbuffer[2];
 uint8_t green = packetbuffer[3];
 uint8_t blue = packetbuffer[4];
-
 void error(const __FlashStringHelper*err) {
   Serial.println(err);
   while (1);
@@ -106,8 +104,8 @@ int extras[6][2] = {
 //Contains a set of values for every five minutes
 int intv[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 
-void setup() {                                           //Runs once when the code is initiated
-  Serial.begin(115200);
+void setup() {                                                                               //Runs once when the code is initiated
+  Serial.begin(115200);                                                                       //Starts the serial monitor
   Serial.println(F("Clock Thing Test"));
   Serial.println(F("-----------------------------------------"));
   Serial.print(F("Initialising the Bluefruit LE module: "));
@@ -116,12 +114,6 @@ void setup() {                                           //Runs once when the co
   }
   Serial.println( F("OK!") );
 
-  if ( FACTORYRESET_ENABLE ) {
-    Serial.println(F("Performing a factory reset: "));
-    if ( ! ble.factoryReset() ) {
-      error(F("Couldn't factory reset"));
-    }
-  }
   ble.echo(false);
 
   Serial.println("Requesting Bluefruit info:");
@@ -135,30 +127,24 @@ void setup() {                                           //Runs once when the co
   }
   ble.setMode(BLUEFRUIT_MODE_DATA);
 
-  //Serial.begin(9600);                                     //Starts the serial monitor
   if (! rtc.begin()) {                                    //For when the clock fails to start
     Serial.flush();                                        //Sends all of the backed up data
     abort();                                               //Stops the program
   }
   if (! rtc.initialized() || rtc.lostPower()) {           //For when the clock is loaded or loses and regains power
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));        //Syncs the clock's time with computer's time
-    //Serial.print(1);
   }
   rtc.start();                                            //Starts clock
   pixels.begin();                                         //Sets up the LEDs
   pixels.clear();                                         //Turns off all LEDs
-  pixels.setPixelColor(20, pixels.Color(200, 200, 200));
-  pixels.show();
+  pixels.setPixelColor(20, pixels.Color(200, 200, 200));  //Sets the 20th pixel as a test to see if the Neopixel is recieving data
+  pixels.show();                                          //Shows the 20th Neopixel
 }
-
-//int r = 0;           //Sets a variable for the red value
-//int g = 0;           //Sets a variable for the green value
-//int b = 0;           //Sets a variable for the blue value
 
 //Changes minutes
 void change_minute(int this_minute, int this_second) {                     //Defines the function and adds values that can be passed into the function
   for (int i = mins[this_minute][0]; i <= mins[this_minute][1]; i++) {      //Sets up LEDs for the corresponding five minute interval
-    pixels.setPixelColor(i, pixels.Color(red, green, blue));                        //Sets the color of the LEDs
+    pixels.setPixelColor(i, pixels.Color(red, green, blue));                 //Sets the color of the LEDs
   }
 }
 
@@ -166,50 +152,46 @@ void change_minute(int this_minute, int this_second) {                     //Def
 void change_hour(int this_hour, int this_minute, int this_second) {             //Defines the function and adds values that can be passed into the function
   if (this_minute < intv[7]) {                                                   //For when it's less than 35 minutes into the hour
     for (int i = hrs[this_hour][0]; i <= hrs[this_hour][1]; i++) {                //Sets up the LEDs for the corresponding hour
-      pixels.setPixelColor(i, pixels.Color(red, green, blue));                            //Sets the color of the LEDs
+      pixels.setPixelColor(i, pixels.Color(red, green, blue));                     //Sets the color of the LEDs
     }
   } else {                                                                       //For when it's greater than 35 minutes into the hour
     for (int i = hrs[this_hour + 1][0]; i <= hrs[this_hour + 1][1]; i++) {        //Sets up the LEDs for the corresponding hour
-      pixels.setPixelColor(i, pixels.Color(red, green, blue));                            //Sets the color of the LEDs
+      pixels.setPixelColor(i, pixels.Color(red, green, blue));                     //Sets the color of the LEDs
     }
   }
 }
 
 //Changes extra words
-void change_extras(int this_minute) {                        //Defines the function and adds values that can be passed into the function
-  int extra_words;                                            //Sets a variable for "extra_words"
-  if (this_minute >= 5) {                                     //For when the time is not on an hour (greater than or equal to 5 minutes into the hour)
-    if (this_minute < intv[7]) {                               //For when it's less than 35 minutes into the hour
-      extra_words = 4;                                          //Sets up the LEDs for when the words "It", "Is", "Minutes", "Past", and "O'clock" should show
-    } else {                                                   //For when it's not less than 35 minutes into the hour
-      extra_words = 3;                                          //Sets up the LEDs for when the words "It", "Is", "Minutes", and "O'clock" should show
+void change_extras(int this_minute) {                           //Defines the function and adds values that can be passed into the function
+  int extra_words;                                               //Sets a variable for "extra_words"
+  if (this_minute >= 5) {                                        //For when the time is not on an hour (greater than or equal to 5 minutes into the hour)
+    if (this_minute < intv[7]) {                                  //For when it's less than 35 minutes into the hour
+      extra_words = 4;                                             //Sets up the LEDs for when the words "It", "Is", "Minutes", "Past", and "O'clock" should show
+    } else {                                                      //For when it's not less than 35 minutes into the hour
+      extra_words = 3;                                             //Sets up the LEDs for when the words "It", "Is", "Minutes", and "O'clock" should show
     }
-  } else {                                                    //For when the time is on an hour (less than 5 minutes into the hour)
-    extra_words = 2;                                           //Sets up for the LEDs for when the words "It", "Is", and "O'clock" should show
+  } else {                                                       //For when the time is on an hour (less than 5 minutes into the hour)
+    extra_words = 2;                                              //Sets up for the LEDs for when the words "It", "Is", and "O'clock" should show
   }
-  for (int i = 0; i <= extra_words; i++) {                    //Sets up the LEDs for the corresponding number of extra words that need to appear
-    for (int j = extras[i][0]; j <= extras[i][1]; j++) {       //Sets up LEDs for the corresponding extra words
-      pixels.setPixelColor(j, pixels.Color(red, green, blue));         //Sets the color of the LEDs
+  for (int i = 0; i <= extra_words; i++) {                       //Sets up the LEDs for the corresponding number of extra words that need to appear
+    for (int j = extras[i][0]; j <= extras[i][1]; j++) {          //Sets up LEDs for the corresponding extra words
+      pixels.setPixelColor(j, pixels.Color(red, green, blue));     //Sets the color of the LEDs
     }
   }
-  if (this_minute >= intv[7]) {                               //For when it's less than 35 minutes into the hour
-    for (int i = extras[5][0]; i <= extras[5][1]; i++) {       //Sets up the LEDs for when the word "To" should show
-      pixels.setPixelColor(i, pixels.Color(red, green, blue));         //Sets the color of the LEDs
+  if (this_minute >= intv[7]) {                                  //For when it's less than 35 minutes into the hour
+    for (int i = extras[5][0]; i <= extras[5][1]; i++) {          //Sets up the LEDs for when the word "To" should show
+      pixels.setPixelColor(i, pixels.Color(red, green, blue));     //Sets the color of the LEDs
     }
   }
 }
 
-//Lights up LEDs
+//Lights up the LEDs
 void show_pixels() {                              //Defines the function
   DateTime now = rtc.now();                        //Allows for "now." functions to be called
-  Serial.print(1);
   int time_sec = now.second();                     //Sets a variable to the current second
   int time_min = now.minute();                     //Sets a variable to the current minute
   int time_hr = now.hour();                        //Sets a variable to the current hour
   if ((time_min % 5) == 0) {                       //For when the time is on a five minute interval
-    //r = 255;                                        //Sets the red value
-    //g = 0;                                          //Sets the green value
-    //b = 0;                                          //Sets the blue value
     pixels.clear();                                 //Turns off all of the LEDs
     change_minute((time_min / 5), time_sec);        //Calls the minute changinng function and passes the current time into it
     change_hour(time_hr, time_min, time_sec);       //Calls the hour changing function and passes the current time into it
@@ -218,31 +200,71 @@ void show_pixels() {                              //Defines the function
   }
 }
 
-void loop() {        //Executes repeatedly
+int current_hr;
+int current_min;
+int current_sec;
+
+//Sets the time
+void set_time() {
+  DateTime now = rtc.now();
   uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
   if (len == 0) return;
-  if (packetbuffer[1] == 'C') {
-    red = packetbuffer[2];
-    green = packetbuffer[3];
-    blue = packetbuffer[4];
+  if (packetbuffer[1] == 'B') {
+    uint8_t buttonnum = packetbuffer[2] - '0';
+    boolean pressed = packetbuffer[3] - '0';
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x37) {
+      current_sec++;
+      if (current_sec > 59) current_sec = 0;
+      rtc.adjust(DateTime(2021, 1, 1, now.hour(), now.minute(), current_sec));
+      rtc.start();
+      Serial.print("current second:");
+      Serial.println(now.second());
+      Serial.println();
+    }
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x38) {
+      current_min++;
+      if (current_min > 59) current_min = 0;
+      rtc.adjust(DateTime(2021, 1, 1, now.hour(), current_min, now.second()));
+      rtc.start();
+      Serial.print("current minute:");
+      Serial.println(now.minute());
+      Serial.println();
+    }
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x35) {
+      current_hr++;
+      if (current_hr > 24) current_hr = 1;
+      rtc.adjust(DateTime(2021, 1, 1, current_hr, now.minute(), now.second()));
+      rtc.start();
+      Serial.print("current hour:");
+      Serial.println(now.hour());
+      Serial.println();
+    }
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x36) {
+      Serial.print("current hour:");
+      Serial.println(now.hour());
+      Serial.print("current minute:");
+      Serial.println(now.minute());
+      Serial.print("current second:");
+      Serial.println(now.second());
+      Serial.println();
+    }
   }
-  show_pixels();      //Lights up LEDs
-  Serial.println(red);
 }
 
-/*
-  array [red, green, blue]
-  if (arrayred != red || arraygreen != green || arrayblue != blue) {
-  reset array [red, green, blue]
-  pixels.clear();
-  change_minute((time_min / 5), time_sec);
-  change_hour(time_hr, time_min, time_sec);
-  change_extras(time_min);
-  pixels.show();
+//Sets the color
+void set_color() {                                            //Defines the function
+  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);      //Reads the data sent from the phone to the bluetooth reciever
+  if (len == 0) return;
+  if (packetbuffer[1] == 'C') {                                  //For when the "Color Picker" is open on the phone
+    red = packetbuffer[2];                                        //Sets a variable to the red value from the "Color Picker"
+    green = packetbuffer[3];                                      //Sets a variable to the green value from the "Color Picker"
+    blue = packetbuffer[4];                                       //Sets a variable to the blue value from the "Color Picker"
   }
+  pixels.show();
+}
 
-  variables for hr min and sec
-  send through BLEUart thing
-  take those and set them to the hr min and sec variables
-  count from there (need to chnage the thing that sets the time based on the computer)
-         rtc.adjust(DateTime(F(__DATE__), F(hr, min, sec))); <--- maybe? might need to set date also to make it work*/
+void loop() {        //Executes repeatedly
+  set_time();         //Sets the time of the RTC
+  set_color();        //Sets the color of the LEDs
+  show_pixels();      //Lights up the LEDs
+}
