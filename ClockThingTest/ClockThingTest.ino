@@ -1,38 +1,42 @@
+//Defines, includes, and global variables
+//RTC section
 #include "RTClib.h"
 RTC_PCF8523 rtc;
+int current_hr;
+int current_min;
+int current_sec;
+//Neopixel section
 #include <Adafruit_NeoPixel.h>
 #define PIN        2
 #define NUMPIXELS 132
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+//Bluefruit section
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
 #include "Adafruit_BLE.h"
 #include "Adafruit_BluefruitLE_SPI.h"
-#include "Adafruit_BluefruitLE_UART.h"
-
 #include "BluefruitConfig.h"
-
 #if SOFTWARE_SERIAL_AVAILABLE
 #include <SoftwareSerial.h>
 #endif
 #define FACTORYRESET_ENABLE         1
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
-//#define MODE_LED_BEHAVIOUR          "MODE"
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 uint8_t readPacket(Adafruit_BLE *ble, uint16_t timeout);
-float parsefloat(uint8_t *buffer);
-void printHex(const uint8_t * data, const uint32_t numBytes);
 extern uint8_t packetbuffer[];
 uint8_t red = packetbuffer[2];
 uint8_t green = packetbuffer[3];
 uint8_t blue = packetbuffer[4];
-void error(const __FlashStringHelper*err) {
-  Serial.println(err);
-  while (1);
+
+//What the bluetooth does when there is an error
+void error(const __FlashStringHelper*err) {     //Defines the function and adds a value to be passed into the function
+  Serial.println(err);                          //Prints the value that is passed into the function
+  while (1);                                    //Does nothing until the loop is broken
 }
 
-//Contains the LED values in each row of the clock, on the LED board they are numbered in a snake pattern
+//Contains the LED values in each row of the clock
+//Be aware that the LEDs on the board are numbered in a snake pattern
 int leds[11][12] = {
   {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},                           // ----->
   {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},                 // <-----
@@ -106,39 +110,26 @@ int intv[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 
 void setup() {                                                                               //Runs once when the code is initiated
   Serial.begin(115200);                                                                       //Starts the serial monitor
-  Serial.println(F("Clock Thing Test"));
-  Serial.println(F("-----------------------------------------"));
-  Serial.print(F("Initialising the Bluefruit LE module: "));
-  if ( !ble.begin(VERBOSE_MODE) ) {
-    error(F("Couldn't find Bluefruit, make sure it's in CoMmanD mode & check wiring?"));
+  if ( !ble.begin(VERBOSE_MODE) ) {                                                           //For when the bluetooth reciever fails to start
+    error(F("Couldn't find Bluefruit, make sure it's in CoMmanD mode & check wiring?"));       //Runs the "error" function (found below the defines, includes, and global variables section)
   }
-  Serial.println( F("OK!") );
-
-  ble.echo(false);
-
-  Serial.println("Requesting Bluefruit info:");
-  ble.info();
-  ble.verbose(false);
-  Serial.println(F("******************************"));
-  if ( ble.isVersionAtLeast(MINIMUM_FIRMWARE_VERSION) )
-  {
-    //  Serial.println(F("Change LED activity to " MODE_LED_BEHAVIOUR));
-    // ble.sendCommandCheckOK("AT+HWModeLED=" MODE_LED_BEHAVIOUR);
+  Serial.println( F("OK!") );                                                                 //Prints "OK!" when the bluetooth reciever has successfully started
+  ble.echo(false);                                                                            //Disables echo output and prints its state
+  ble.verbose(false);                                                                         //Disables debug output
+  ble.setMode(BLUEFRUIT_MODE_DATA);                                                           //Sets the bluetooth reciever to data recieving mode
+  Serial.println(":)");                                                                       //Prints ":)" when the bluetooth reciever is finished starting
+  if (! rtc.begin()) {                                                                        //For when the clock fails to start
+    Serial.flush();                                                                            //Sends all of the backed up data
+    abort();                                                                                   //Stops the program
   }
-  ble.setMode(BLUEFRUIT_MODE_DATA);
-
-  if (! rtc.begin()) {                                    //For when the clock fails to start
-    Serial.flush();                                        //Sends all of the backed up data
-    abort();                                               //Stops the program
+  if (! rtc.initialized() || rtc.lostPower()) {                                               //For when the clock is loaded or loses and regains power
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));                                            //Syncs the clock's time with computer's time
   }
-  if (! rtc.initialized() || rtc.lostPower()) {           //For when the clock is loaded or loses and regains power
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));        //Syncs the clock's time with computer's time
-  }
-  rtc.start();                                            //Starts clock
-  pixels.begin();                                         //Sets up the LEDs
-  pixels.clear();                                         //Turns off all LEDs
-  pixels.setPixelColor(20, pixels.Color(200, 200, 200));  //Sets the 20th pixel as a test to see if the Neopixel is recieving data
-  pixels.show();                                          //Shows the 20th Neopixel
+  rtc.start();                                                                                //Starts the clock
+  pixels.begin();                                                                             //Sets up the LEDs
+  pixels.clear();                                                                             //Turns off all of the LEDs
+  pixels.setPixelColor(20, pixels.Color(200, 200, 255));                                      //Sets the 20th pixel as a test to see if the Neopixel is recieving data
+  pixels.show();                                                                              //Turns on the 20th Neopixel
 }
 
 //Changes minutes
@@ -200,67 +191,69 @@ void show_pixels() {                              //Defines the function
   }
 }
 
-int current_hr;
-int current_min;
-int current_sec;
-
 //Sets the time
+//Be aware that when the time is set it adds one extra to whatever unit is used
+//Always set the time to one unit less than you intend, then hit the down button to confirm the time is right
 void set_time() {
-  DateTime now = rtc.now();
-  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
+  DateTime now = rtc.now();                                                         //Allows for "now." functions to be called
+  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);                           
   if (len == 0) return;
-  if (packetbuffer[1] == 'B') {
-    uint8_t buttonnum = packetbuffer[2] - '0';
-    boolean pressed = packetbuffer[3] - '0';
-    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x37) {
-      current_sec++;
-      if (current_sec > 59) current_sec = 0;
-      rtc.adjust(DateTime(2021, 1, 1, now.hour(), now.minute(), current_sec));
-      rtc.start();
-      Serial.print("current second:");
-      Serial.println(now.second());
-      Serial.println();
+  if (packetbuffer[1] == 'B') {                                                     //For when the "Control Pad" is open on the phone
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x37) {                        //For when the left button is pressed
+      current_sec++;                                                                  //Adds one to the "current_sec" variable
+      if (current_sec > 59) {                                                         //For when the second is greater than 59
+        current_sec = 0;                                                               //Sets the second to zero
+      }
+      rtc.adjust(DateTime(2021, 1, 1, now.hour(), now.minute(), current_sec));        //Sets the hour to the variable "current_sec"
+      rtc.start();                                                                    //Starts the clock
+      Serial.print("current second:");                                                //Prints "current second:"
+      Serial.println(now.second());                                                   //Prints the current second
+      Serial.println();                                                               //Prints an empty line
     }
-    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x38) {
-      current_min++;
-      if (current_min > 59) current_min = 0;
-      rtc.adjust(DateTime(2021, 1, 1, now.hour(), current_min, now.second()));
-      rtc.start();
-      Serial.print("current minute:");
-      Serial.println(now.minute());
-      Serial.println();
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x38) {                        //For when the right button is pressed
+      current_min++;                                                                  //Adds one to the "current_min" variable
+      if (current_min > 59) {                                                         //For when the minute is greater than 59
+        current_min = 0;                                                               //Sets the minute to zero
+      }
+      rtc.adjust(DateTime(2021, 1, 1, now.hour(), current_min, now.second()));        //Sets the hour to the variable "current_min"
+      rtc.start();                                                                    //Starts the clock
+      Serial.print("current minute:");                                                //Prints "current minute:"
+      Serial.println(now.minute());                                                   //Prints the current minute
+      Serial.println();                                                               //Prints an empty line
     }
-    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x35) {
-      current_hr++;
-      if (current_hr > 24) current_hr = 1;
-      rtc.adjust(DateTime(2021, 1, 1, current_hr, now.minute(), now.second()));
-      rtc.start();
-      Serial.print("current hour:");
-      Serial.println(now.hour());
-      Serial.println();
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x35) {                        //For when the up button is pressed
+      current_hr++;                                                                   //Adds one to the "current_hr" variable
+      if (current_hr > 24) {                                                          //For when the hour is greater than 24
+        current_hr = 1;                                                                //Sets the hour to one
+      }
+      rtc.adjust(DateTime(2021, 1, 1, current_hr, now.minute(), now.second()));       //Sets the hour to the variable "current_hr"
+      rtc.start();                                                                    //Starts the clock
+      Serial.print("current hour:");                                                  //Prints "current hour:"
+      Serial.println(now.hour());                                                     //Prints the current hour
+      Serial.println();                                                               //Prints an empty line
     }
-    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x36) {
-      Serial.print("current hour:");
-      Serial.println(now.hour());
-      Serial.print("current minute:");
-      Serial.println(now.minute());
-      Serial.print("current second:");
-      Serial.println(now.second());
-      Serial.println();
+    if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x36) {                        //For when the down button is pressed
+      Serial.print("current hour:");                                                  //Prints "current hour:"
+      Serial.println(now.hour());                                                     //Prints the current hour
+      Serial.print("current minute:");                                                //Prints "current minute:"
+      Serial.println(now.minute());                                                   //Prints the current minute
+      Serial.print("current second:");                                                //Prints "current second:"
+      Serial.println(now.second());                                                   //Prints the current second
+      Serial.println();                                                               //Prints an empty line
     }
   }
 }
 
 //Sets the color
-void set_color() {                                            //Defines the function
-  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);      //Reads the data sent from the phone to the bluetooth reciever
+void set_color() {                                          //Defines the function
+  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
   if (len == 0) return;
-  if (packetbuffer[1] == 'C') {                                  //For when the "Color Picker" is open on the phone
-    red = packetbuffer[2];                                        //Sets a variable to the red value from the "Color Picker"
-    green = packetbuffer[3];                                      //Sets a variable to the green value from the "Color Picker"
-    blue = packetbuffer[4];                                       //Sets a variable to the blue value from the "Color Picker"
+  if (packetbuffer[1] == 'C') {                              //For when the "Color Picker" is open on the phone
+    red = packetbuffer[2];                                    //Sets a variable to the red value from the "Color Picker"
+    green = packetbuffer[3];                                  //Sets a variable to the green value from the "Color Picker"
+    blue = packetbuffer[4];                                   //Sets a variable to the blue value from the "Color Picker"
   }
-  pixels.show();
+  pixels.show();                                             //Turns on the LEDs that were called for in the functions above
 }
 
 void loop() {        //Executes repeatedly
