@@ -211,8 +211,6 @@ void show_pixels() {                              //Defines the function
 void set_time() {
   DateTime now = rtc.now();                                                   //Allows for "now." functions to be called
   ble.readline();                                                             //Reads the data sent from the phone
-  if (strcmp(ble.buffer, "OK") == 0) return;                                  //For when the something that usually equals -79 is equal to zeo; Do nothing
-  ble.waitForOK();                                                            //Does nothing until "OK" is not equal to zero
   if (ble.buffer[0] == 'h') {                                                 //For when the first character in the message is "h"
     if (ble.buffer[2] != 0) {                                                  //For when there is a third character in the message
       current_hr = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);          //Sets the current hour to the value of the second character minus forty-eight multiplied by ten plus value of the third character minus forty-eight
