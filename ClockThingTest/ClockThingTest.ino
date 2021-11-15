@@ -192,11 +192,11 @@ void show_pixels() {                              //Defines the function
 }
 
 //Sets the time
-//Be aware that when the time is set it adds one extra to whatever unit is used
+//Be aware that the serial print for each unit of time is one behind the actual time
 //Always set the time to one unit less than you intend, then hit the down button to confirm the time is right
 void set_time() {
   DateTime now = rtc.now();                                                         //Allows for "now." functions to be called
-  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);                           
+  uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
   if (len == 0) return;
   if (packetbuffer[1] == 'B') {                                                     //For when the "Control Pad" is open on the phone
     if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x37) {                        //For when the left button is pressed
@@ -204,8 +204,8 @@ void set_time() {
       if (current_sec > 59) {                                                         //For when the second is greater than 59
         current_sec = 0;                                                               //Sets the second to zero
       }
-      rtc.adjust(DateTime(2021, 1, 1, now.hour(), now.minute(), current_sec));        //Sets the hour to the variable "current_sec"
-      rtc.start();                                                                    //Starts the clock
+      //rtc.adjust(DateTime(2021, 1, 1, now.hour(), now.minute(), current_sec));        //Sets the hour to the variable "current_sec"
+      //rtc.start();                                                                    //Starts the clock
       Serial.print("current second:");                                                //Prints "current second:"
       Serial.println(now.second());                                                   //Prints the current second
       Serial.println();                                                               //Prints an empty line
@@ -215,25 +215,27 @@ void set_time() {
       if (current_min > 59) {                                                         //For when the minute is greater than 59
         current_min = 0;                                                               //Sets the minute to zero
       }
-      rtc.adjust(DateTime(2021, 1, 1, now.hour(), current_min, now.second()));        //Sets the hour to the variable "current_min"
-      rtc.start();                                                                    //Starts the clock
+      //rtc.adjust(DateTime(2021, 1, 1, now.hour(), current_min, now.second()));        //Sets the hour to the variable "current_min"
+      //rtc.start();                                                                    //Starts the clock
       Serial.print("current minute:");                                                //Prints "current minute:"
       Serial.println(now.minute());                                                   //Prints the current minute
       Serial.println();                                                               //Prints an empty line
     }
     if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x35) {                        //For when the up button is pressed
       current_hr++;                                                                   //Adds one to the "current_hr" variable
+      Serial.print(current_hr);
       if (current_hr > 24) {                                                          //For when the hour is greater than 24
         current_hr = 1;                                                                //Sets the hour to one
       }
-      rtc.adjust(DateTime(2021, 1, 1, current_hr, now.minute(), now.second()));       //Sets the hour to the variable "current_hr"
-      rtc.start();                                                                    //Starts the clock
-      Serial.print("current hour:");                                                  //Prints "current hour:"
-      Serial.println(now.hour());                                                     //Prints the current hour
-      Serial.println();                                                               //Prints an empty line
+      //rtc.adjust(DateTime(2021, 1, 1, current_hr, now.minute(), now.second()));       //Sets the hour to the variable "current_hr"
+      //rtc.adjust(DateTime(2021, 1, 1, 5, now.minute(), now.second()));
+      //rtc.start();                                                                    //Starts the clock
+      //Serial.print("current hour:");                                                  //Prints "current hour:"
+      //Serial.println(now.hour());                                                     //Prints the current hour
+      //Serial.println();                                                               //Prints an empty line
     }
     if (packetbuffer[3] == 0x31 && packetbuffer[2] == 0x36) {                        //For when the down button is pressed
-      Serial.print("current hour:");                                                  //Prints "current hour:"
+      Serial.print("current hour 2:");                                                  //Prints "current hour:"
       Serial.println(now.hour());                                                     //Prints the current hour
       Serial.print("current minute:");                                                //Prints "current minute:"
       Serial.println(now.minute());                                                   //Prints the current minute
@@ -241,6 +243,11 @@ void set_time() {
       Serial.println(now.second());                                                   //Prints the current second
       Serial.println();                                                               //Prints an empty line
     }
+    rtc.adjust(DateTime(2021, 1, 1, current_hr, current_min, current_sec));
+    rtc.start();
+    Serial.print("current hour:");
+    Serial.println(now.hour());
+    Serial.println();
   }
 }
 
