@@ -213,19 +213,19 @@ void set_time() {
   ble.readline();                                                             //Reads the data sent from the phone
   if (ble.buffer[0] == 'h') {                                                 //For when the first character in the message is "h"
     if (ble.buffer[2] != 0) {                                                  //For when there is a third character in the message
-      current_hr = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);          //Sets the current hour to the value of the second character minus forty-eight multiplied by ten plus value of the third character minus forty-eight
+      current_hr = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);          //Sets the current hour to the value of the second character minus forty-eight multiplied by ten plus the value of the third character minus forty-eight
     } else {                                                                   //For when there is not a third character in the message
       current_hr = ble.buffer[1] - 48;                                          //Sets the current hour to the value of the second character minus forty-eight
     }
   } else if (ble.buffer[0] == 'm') {                                          //For when the fist character in the message is "m"
     if (ble.buffer[2] != 0) {                                                  //For when there is a third character in the message
-      current_min = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);         //Sets the current minute to the value of the second character minus forty-eight multiplied by ten plus value of the third character minus forty-eight
+      current_min = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);         //Sets the current minute to the value of the second character minus forty-eight multiplied by ten plus the value of the third character minus forty-eight
     } else {                                                                   //For when there is not a third character
       current_min = ble.buffer[1] - 48;                                         //Sets the current minute to the value of the second character minus forty-eight
     }
   } else if (ble.buffer[0] == 's') {                                          //For when the fist character in the message is "s"
     if (ble.buffer[2] != 0) {                                                  //For when there is a third character in the message
-      current_sec = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);         //Sets the current second to the value of the second character minus forty-eight multiplied by ten plus value of the third character minus forty-eight
+      current_sec = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);         //Sets the current second to the value of the second character minus forty-eight multiplied by ten plus the  value of the third character minus forty-eight
     } else {                                                                   //For when there is not a third character in the mmessage
       current_sec = ble.buffer[1] - 48;                                         //Sets the current second to the value of the second character minus forty-eight
     }
