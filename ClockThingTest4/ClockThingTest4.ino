@@ -7,15 +7,15 @@
 //2) To set the hour, type "h#", where "#" is the number of the hour you want to set the clock to, and hit send
 //3) To set the minute, type "m#", where "#" is the number of the minute you want to set the clock to, and hit send
 //4) To set the second, type "s#", where "#" is the number of the second you want to set the clock to, and hit send
-//5) To push that data to the RTC type "t"
+//5) To push that data to the RTC type "t" and hit send
 //NOTE: Please DO NOT set a time that would not appear on an analog clock.
 //Setting the Color:
 //1) Open the "UART" section in the Bluefruit Connect app
 //2) To set the red value, type "r#", where "#" is the number you want to set the red value to, and hit send
 //3) To set the green value, type "g#", where "#" is the number you want to set the green value to, and hit send
 //4) To set the blue value, type "b#", where "#" is the number you want to set the blue value to, and hit send
-//5) To set a random color value, type "q"
-//6) To push that data to the LEDs, type "c"
+//5) To set a random color value, type "q" and hit send
+//6) To push that data to the LEDs, type "c" and hit send
 //NOTE: You may need to imput commands several times before they register. The command has only registered once a value is returned.
 
 //Defines, includes, and global variables
@@ -152,14 +152,14 @@ void setup() {                                                                  
   pixels.show();                                                                              //Turns on the 20th Neopixel
 }
 
-//Changes minutes
+//Changes the minute
 void change_minute(int this_minute, int this_second) {                     //Defines the function and adds values that can be passed into the function
   for (int i = mins[this_minute][0]; i <= mins[this_minute][1]; i++) {      //Sets up LEDs for the corresponding five minute interval
     pixels.setPixelColor(i, pixels.Color(red, green, blue));                 //Sets the color of the LEDs
   }
 }
 
-//Changes hours
+//Changes the hour
 void change_hour(int this_hour, int this_minute, int this_second) {             //Defines the function and adds values that can be passed into the function
   if (this_minute < intv[7]) {                                                   //For when it's less than 35 minutes into the hour
     for (int i = hrs[this_hour][0]; i <= hrs[this_hour][1]; i++) {                //Sets up the LEDs for the corresponding hour
@@ -172,7 +172,7 @@ void change_hour(int this_hour, int this_minute, int this_second) {             
   }
 }
 
-//Changes extra words
+//Changes the extra words
 void change_extras(int this_minute) {                           //Defines the function and adds values that can be passed into the function
   int extra_words;                                               //Sets a variable for "extra_words"
   if (this_minute >= 5) {                                        //For when the time is not on an hour (greater than or equal to 5 minutes into the hour)
@@ -221,21 +221,21 @@ void set_time() {
     } else {                                                                   //For when there is not a third character in the message
       current_hr = ble.buffer[1] - 48;                                          //Sets the current hour to the value of the second character minus forty-eight
     }
-    ble.print(current_hr);                                                     //Prints the hour that is being set on the phone
+    ble.println(current_hr);                                                     //Prints the hour that is being set on the phone
   } else if (ble.buffer[0] == 'm') {                                          //For when the fist character in the message is "m"
     if (ble.buffer[2] != 0) {                                                  //For when there is a third character in the message
       current_min = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);         //Sets the current minute to the value of the second character minus forty-eight multiplied by ten plus the value of the third character minus forty-eight
     } else {                                                                   //For when there is not a third character
       current_min = ble.buffer[1] - 48;                                         //Sets the current minute to the value of the second character minus forty-eight
     }
-    ble.print(current_min);                                                    //Prints the minute that is being set on the phone
+    ble.println(current_min);                                                    //Prints the minute that is being set on the phone
   } else if (ble.buffer[0] == 's') {                                          //For when the fist character in the message is "s"
     if (ble.buffer[2] != 0) {                                                  //For when there is a third character in the message
       current_sec = ((ble.buffer[1] - 48) * 10) + (ble.buffer[2] - 48);         //Sets the current second to the value of the second character minus forty-eight multiplied by ten plus the value of the third character minus forty-eight
     } else {                                                                   //For when there is not a third character in the mmessage
       current_sec = ble.buffer[1] - 48;                                         //Sets the current second to the value of the second character minus forty-eight
     }
-    ble.print(current_sec);                                                    //Prints the second that is being set on the phone
+    ble.println(current_sec);                                                    //Prints the second that is being set on the phone
   } else if (ble.buffer[0] == 't') {                                          //For when the first character in the message is "t"
     ble.print(current_hr);                                                     //Prints the hour that is being set on the phone
     ble.print(": ");                                                           //Prints a colon and a space on the phone
