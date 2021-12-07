@@ -4,16 +4,16 @@
 //2) Connect to the "Adafruit Bluefruit LE" in the Bluefruit Connect app
 //Setting the Time:
 //1) Open the "UART" section in the Bluefruit Connect app
-//2) To set the hour, type "h#", where "#" is the number of the hour you want to set the clock to
-//3) To set the minute, type "m#", where "#" is the number of the minute you want to set the clock to
-//4) To set the second, type "s#", where "#" is the number of the second you want to set the clock to
+//2) To set the hour, type "h#", where "#" is the number of the hour you want to set the clock to, and hit send
+//3) To set the minute, type "m#", where "#" is the number of the minute you want to set the clock to, and hit send
+//4) To set the second, type "s#", where "#" is the number of the second you want to set the clock to, and hit send
 //5) To push that data to the RTC type "t"
 //NOTE: Please DO NOT set a time that would not appear on an analog clock.
 //Setting the Color:
 //1) Open the "UART" section in the Bluefruit Connect app
-//2) To set the red value, type "r#", where "#" is the number you want to set the red value to
-//3) To set the green value, type "g#", where "#" is the number you want to set the green value to
-//4) To set the blue value, type "b#", where "#" is the number you want to set the blue value to
+//2) To set the red value, type "r#", where "#" is the number you want to set the red value to, and hit send
+//3) To set the green value, type "g#", where "#" is the number you want to set the green value to, and hit send
+//4) To set the blue value, type "b#", where "#" is the number you want to set the blue value to, and hit send
 //5) To set a random color value, type "q"
 //6) To push that data to the LEDs, type "c"
 //NOTE: You may need to imput commands several times before they register. The command has only registered once a value is returned.
@@ -45,12 +45,9 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 uint8_t readPacket(Adafruit_BLE *ble, uint16_t timeout);
 extern uint8_t packetbuffer[];
-/*uint8_t red = packetbuffer[2];
-  uint8_t green = packetbuffer[3];
-  uint8_t blue = packetbuffer[4];*/
-uint8_t red = 0;
-uint8_t green = 0;
-uint8_t blue = 0;
+uint8_t red = 100;
+uint8_t green = 100;
+uint8_t blue = 100;
 
 //What the bluetooth does when there is an error
 void error(const __FlashStringHelper*err) {     //Defines the function and adds a value to be passed into the function
@@ -290,29 +287,29 @@ void set_color() {                                                              
     }
     ble.println(blue);                                                                                //Prints the blue value on the phone
   } else if (ble.buffer[0] == 'q') {                                                                 //For when the first character of the message is "q"
-    red = random(255);                                                                              //Sets the red variable to a random value from zero to two-hundred-fifty-five
-    green = random(255);                                                                            //Sets the green variable to a random value from zero to two-hundred-fifty-five
-    blue = random(255);                                                                             //Sets the blue variable to a random value from zero to two-hundred-fifty-five
-    ble.print(red);                                                                                 //Prints the red value on the phone
-    ble.print(": ");                                                                                //Prints a colon and a space on the phone
-    ble.print(green);                                                                               //Prints the green value on the phone
-    ble.print(": ");                                                                                //Prints a colon and a space on the phone
-    ble.println(blue);                                                                              //prints the blue value on the phone
-  } else if (ble.buffer[0] == 'c') {                                                               //For when the first character of the message is "c"
-    int time_hr = now.hour();                                                                       //Sets a variable to the current hour
-    int time_min = now.minute();                                                                    //Sets a variable to the current minute
-    int time_sec = now.second();                                                                    //Sets a variable to the current second
-    ble.print(red);                                                                                 //Prints the red value on the phone
-    ble.print(": ");                                                                                //Prints a colon and a space on the phone
-    ble.print(green);                                                                               //Prints the green value on the phone
-    ble.print(": ");                                                                                //prints a colon annd a space on the phone
-    ble.println(blue);                                                                              //Prints the blue value on the phone
-    rtc.start();                                                                                    //Starts the clock
-    pixels.clear();                                                                                 //Turns off all of the LEDs
-    change_minute((time_min / 5), time_sec);                                                        //Calls the minute changinng function and passes the current time into it
-    change_hour(time_hr, time_min, time_sec);                                                       //Calls the hour changing function and passes the current time into it
-    change_extras(time_min);                                                                        //Calls the extra word changing function and passes the current time into it
-    pixels.show();                                                                                  //Turns on the LEDs that were called for in the previous three functions
+    red = random(255);                                                                                //Sets the red variable to a random value from zero to two-hundred-fifty-five
+    green = random(255);                                                                              //Sets the green variable to a random value from zero to two-hundred-fifty-five
+    blue = random(255);                                                                               //Sets the blue variable to a random value from zero to two-hundred-fifty-five
+    ble.print(red);                                                                                   //Prints the red value on the phone
+    ble.print(": ");                                                                                  //Prints a colon and a space on the phone
+    ble.print(green);                                                                                 //Prints the green value on the phone
+    ble.print(": ");                                                                                  //Prints a colon and a space on the phone
+    ble.println(blue);                                                                                //prints the blue value on the phone
+  } else if (ble.buffer[0] == 'c') {                                                                 //For when the first character of the message is "c"
+    int time_hr = now.hour();                                                                         //Sets a variable to the current hour
+    int time_min = now.minute();                                                                      //Sets a variable to the current minute
+    int time_sec = now.second();                                                                      //Sets a variable to the current second
+    ble.print(red);                                                                                   //Prints the red value on the phone
+    ble.print(": ");                                                                                  //Prints a colon and a space on the phone
+    ble.print(green);                                                                                 //Prints the green value on the phone
+    ble.print(": ");                                                                                  //prints a colon annd a space on the phone
+    ble.println(blue);                                                                                //Prints the blue value on the phone
+    rtc.start();                                                                                      //Starts the clock
+    pixels.clear();                                                                                   //Turns off all of the LEDs
+    change_minute((time_min / 5), time_sec);                                                          //Calls the minute changinng function and passes the current time into it
+    change_hour(time_hr, time_min, time_sec);                                                         //Calls the hour changing function and passes the current time into it
+    change_extras(time_min);                                                                          //Calls the extra word changing function and passes the current time into it
+    pixels.show();                                                                                    //Turns on the LEDs that were called for in the previous three functions
   }
 }
 
