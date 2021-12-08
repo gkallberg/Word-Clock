@@ -4,11 +4,11 @@
 //2) Connect to the "Adafruit Bluefruit LE" in the Bluefruit Connect app
 //Setting the Time:
 //1) Open the "UART" section in the Bluefruit Connect app
-//2) To set the hour, type "h#", where "#" is the number of the hour you want to set the clock to
-//3) To set the minute, type "m#", where "#" is the number of the minute you want to set the clock to
-//4) To set the second, type "s#", where "#" is the number of the second you want to set the clock to
+//2) To set the hour, type "h#", where "#" is the number of the hour you want to set the clock to, and hit send
+//3) To set the minute, type "m#", where "#" is the number of the minute you want to set the clock to, and hit send
+//4) To set the second, type "s#", where "#" is the number of the second you want to set the clock to, and hit send
 //5) To push that data to the RTC type "t"
-//NOTE: Please DO NOT set a time that would not appear on an analog clock. I don't know what will happen, and honestly, I'd rather keep it that way.
+//NOTE: Please DO NOT set a time that would not appear on an analog clock
 //Setting the Color:
 //1) Open the "Controller" section of the Bluefruit Connect app
 //2) Open the "Color Picker" section in the "Controller" section
